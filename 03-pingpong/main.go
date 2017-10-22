@@ -1,8 +1,15 @@
 package main
 
-import "time"
+import (
+	"os"
+	"runtime/trace"
+	"time"
+)
 
 func main() {
+	trace.Start(os.Stderr)
+	defer trace.Stop()
+
 	var Ball int
 	table := make(chan int)
 	go player(table)
