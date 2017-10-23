@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"runtime/trace"
 	"time"
@@ -10,21 +11,20 @@ func main() {
 	trace.Start(os.Stderr)
 	defer trace.Stop()
 
-	var Ball int
 	table := make(chan int)
-	go player(table)
-	go player(table)
+	go player(table, "ping")
+	go player(table, "pong")
 
-	table <- Ball
-	time.Sleep(1 * time.Second)
-	<-table
+	table <- 0
+	time.Sleep(time.Second)
+	ball := <-table
+	close(table)
+	fmt.Printf("played %d turns\n", ball)
 }
 
-func player(table chan int) {
-	for {
-		ball := <-table
-		ball++
-		time.Sleep(100 * time.Millisecond)
-		table <- ball
+func player(table chan int, name string) {
+	for ball := range table {
+		fmt.Printf("%d\t%s\n", ball, name)
+		table <- ball + 1
 	}
 }
