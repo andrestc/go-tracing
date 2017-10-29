@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"runtime/trace"
 	"sync"
 	"time"
 )
@@ -20,7 +22,7 @@ func worker(tasksCh <-chan int, wg *sync.WaitGroup) {
 }
 
 func pool(wg *sync.WaitGroup, workers, tasks int) {
-	tasksCh := make(chan int)
+	tasksCh := make(chan int, 50)
 
 	for i := 0; i < workers; i++ {
 		go worker(tasksCh, wg)
@@ -34,6 +36,9 @@ func pool(wg *sync.WaitGroup, workers, tasks int) {
 }
 
 func main() {
+	trace.Start(os.Stderr)
+	defer trace.Stop()
+
 	var wg sync.WaitGroup
 	wg.Add(36)
 	go pool(&wg, 36, 50)
